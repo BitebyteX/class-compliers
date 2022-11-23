@@ -1,9 +1,15 @@
 {
-  "name": "rescript-project-template",
-  "sources": {
+  "name": "class-compliers",
+  "sources": [
+    {
     "dir": "src",
     "subdirs": true
-  },
+    },
+    {
+      "dir": "test",
+      "type": "dev"
+    }
+  ],
   "package-specs": {
     "module": "commonjs",
     "in-source": true

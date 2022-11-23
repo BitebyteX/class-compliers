@@ -3,6 +3,7 @@
 
 var List = require("rescript/lib/js/list.js");
 var Caml_obj = require("rescript/lib/js/caml_obj.js");
+var Belt_List = require("rescript/lib/js/belt_List.js");
 
 function $$eval(_expr, _env) {
   while(true) {
@@ -76,8 +77,8 @@ function index(cenv, x) {
   throw {
         RE_EXN_ID: "Assert_failure",
         _1: [
-          "class1.res",
-          52,
+          "Class1.res",
+          51,
           24
         ],
         Error: new Error()
@@ -210,9 +211,9 @@ function $$eval$2(_instrs, _stk) {
     throw {
           RE_EXN_ID: "Assert_failure",
           _1: [
-            "class1.res",
-            95,
-            15
+            "Class1.res",
+            94,
+            19
           ],
           Error: new Error()
         };
@@ -223,8 +224,96 @@ var StackVM = {
   $$eval: $$eval$2
 };
 
+function sindex(senv, i) {
+  if (senv) {
+    if (senv.hd) {
+      return sindex(senv.tl, i) + 1 | 0;
+    } else if (i === 0) {
+      return 0;
+    } else {
+      return sindex(senv.tl, i - 1 | 0) + 1 | 0;
+    }
+  }
+  throw {
+        RE_EXN_ID: "Assert_failure",
+        _1: [
+          "Class1.res",
+          107,
+          20
+        ],
+        Error: new Error()
+      };
+}
+
+function comp$1(expr, senv) {
+  switch (expr.TAG | 0) {
+    case /* Cst */0 :
+        return {
+                hd: {
+                  TAG: /* Cst */0,
+                  _0: expr._0
+                },
+                tl: /* [] */0
+              };
+    case /* Add */1 :
+        return Belt_List.concatMany([
+                    comp$1(expr._0, senv),
+                    comp$1(expr._1, {
+                          hd: /* Stmp */1,
+                          tl: senv
+                        }),
+                    {
+                      hd: /* Add */0,
+                      tl: /* [] */0
+                    }
+                  ]);
+    case /* Mul */2 :
+        return Belt_List.concatMany([
+                    comp$1(expr._0, senv),
+                    comp$1(expr._1, {
+                          hd: /* Stmp */1,
+                          tl: senv
+                        }),
+                    {
+                      hd: /* Mul */1,
+                      tl: /* [] */0
+                    }
+                  ]);
+    case /* Var */3 :
+        return {
+                hd: {
+                  TAG: /* Var */1,
+                  _0: sindex(senv, expr._0)
+                },
+                tl: /* [] */0
+              };
+    case /* Let */4 :
+        return Belt_List.concatMany([
+                    comp$1(expr._0, senv),
+                    comp$1(expr._1, {
+                          hd: /* Slocal */0,
+                          tl: senv
+                        }),
+                    {
+                      hd: /* Swap */3,
+                      tl: {
+                        hd: /* Pop */2,
+                        tl: /* [] */0
+                      }
+                    }
+                  ]);
+    
+  }
+}
+
+var Nameless2StackVM = {
+  sindex: sindex,
+  comp: comp$1
+};
+
 exports.Name = Name;
 exports.Nameless = Nameless;
 exports.Name2Nameless = Name2Nameless;
 exports.StackVM = StackVM;
+exports.Nameless2StackVM = Nameless2StackVM;
 /* No side effect */
